@@ -1,76 +1,129 @@
 HoRContribPoints = CreateFrame("Frame")
 
-function HoRContribPoints:OnEvent(event, ...)
-	self[event](self, event, ...)
-end
+--------------------------
+-- Default storage data --
+--------------------------
+local HoRContribPointsLimits = {
+  min = 0,
+  max = 200
+}
 
-HoRContribPoints:SetScript("OnEvent", HoRContribPoints.OnEvent)
+HoRContribPoints.defaults = {
+	points = 0
+}
+
+-- Register the addon
 HoRContribPoints:RegisterEvent("ADDON_LOADED")
 
+-------------------------------------------
+-- Check if string starts with a pattern --
+-------------------------------------------
+function string.starts(String,Start)
+  return string.sub(String,1,string.len(Start))==Start
+end
+
+------------------
+-- Fancy Output --
+------------------
+function out(message)
+  print("|cffFFC125[HoR-CP]|r "..message)
+end
+
+---------------------------
+-- Addon loading actions --
+---------------------------
 function HoRContribPoints:ADDON_LOADED(event, addOnName)
+  -- Only run if we're the addon firing
 	if addOnName == "HoRContribPoints" then
+    -- Pull in the stored data
 		HoRContribPointsDB = HoRContribPointsDB or {}
-		self.db = HoRContribPointsDB
-		for k, v in pairs(self.defaults) do
+
+    -- Assign stored instance to this instance
+    self.db = HoRContribPointsDB
+
+    -- Cycle through data and fill defaults where needed
+    for k, v in pairs(self.defaults) do
 			if self.db[k] == nil then
 				self.db[k] = v
 			end
 		end
 
-    self.db.sessions = self.db.sessions + 1
---		print("You loaded this addon "..self.db.sessions.." times")
-
+    -- Get some client information
 		local version, build, _, tocversion = GetBuildInfo()
-		print(format("[HORCP] The current WoW build is %s (%d) and TOC is %d", version, build, tocversion))
+		out(format("The current WoW build is %s (%d) and TOC is %d", version, build, tocversion))
 
+    -- 
 		self:RegisterEvent("PLAYER_ENTERING_WORLD")
-		self:InitializeOptions()
 		self:UnregisterEvent(event)
 	end
 end
 
-function string.starts(String,Start)
-  return string.sub(String,1,string.len(Start))==Start
-end
+------------------------------------
+-- Handle slashcommand definition --
+------------------------------------
+SLASH_HORCP1 = "/horcp"
+SLASH_HORCP2 = "/horcontribpoints"
 
-function HoRContribPoints:PLAYER_ENTERING_WORLD(event, isLogin, isReload)
-	if isLogin and self.db.hello then
-		DoEmote("HELLO")
-	end
-end
-
-SLASH_HELLOW1 = "/horcp"
-SLASH_HELLOW2 = "/horcontribpoints"
-
-SlashCmdList.HELLOW = function(msg, editBox)
+----------------------------------
+-- Handle slash command actions --
+----------------------------------
+SlashCmdList.HORCP = function(msg, editBox)
+  -- Pull in the saved data
   HoRContribPointsDB = HoRContribPointsDB or {}
+
   if msg == "roll" then
+    ---------------------------
+    -- Handle Roll Modifiers --
+    ---------------------------
     local base = HoRContribPointsDB.points + 0
     local top  = HoRContribPointsDB.points + 100
-    print("[HORCP] Rolling based on your cp "..HoRContribPointsDB.points)
+
+    -- Show the user rolling contributions
+    out("Rolling based on your cp "..HoRContribPointsDB.points)
+
+    -- Execute roll (user has no more control than a normal /rol)
     RandomRoll(base, top)
   elseif string.starts(msg, "set") then
+    --------------------------------------------------------
+    -- Manually set your contribution points for the week --
+    --------------------------------------------------------
     words = {}
-    for word in msg:gmatch("%S+") do table.insert(words, word) end
+
+    -- Split into words
+    for word in msg:gmatch("%S+") do 
+      table.insert(words, word) 
+    end
+
+    -- If the first word is set, grab the 2nd word and convert to a number
     local cpval = tonumber(words[2])
 
-    if cpval >= 0 and cpval <= 200 then
-      HoRContribPointsDB = HoRContribPointsDB or {}
+    if cpval == nil then
+      -- Limit the CP values to sane numbers
+      out("Invalid entry. please choose a number between "..HoRContribPointsLimits.min.." and "..HoRContribPointsLimits.max)    
+    elseif cpval >= HoRContribPointsLimits.min and cpval <= HoRContribPointsLimits.max then
+      -- If the value is between the ranges, set it
       HoRContribPointsDB.points = cpval
-      print("[HORCP] Setting CP value to "..cpval)
-
+      out("Setting CP value to "..cpval)
     else
-      print("[HORCP] CP value must be a number between 0 and 200")
+      -- Handle invalid numbers
+      out("CP value must be a number between "..HoRContribPointsLimits.min.." and "..HoRContribPointsLimits.max)
     end
-  elseif msg == "config" then
-    InterfaceOptionsFrame_OpenToCategory(HoRContribPoints.panel_main)
   elseif msg == "help" then
-    print("[HORCP] Usage: /horcp")
-    print("[HORCP]   Get CP  : /horcp get")
-    print("[HORCP]   Set CP  : /horcp set 0-200")
-    print("[HORCP]   Roll CP : /horcp roll")
+    ------------------------
+    --  Show help message --
+    ------------------------
+    out("Heart of Redemption (Stormrage) Contribution Points")
+    out("Usage: /horcp")
+    out(" ")
+    out("  Set your contribution points using")
+    out("    /horcp set 0-200")
+    out(" ")
+    out("  Roll using your contribution points modifiers")
+    out("    /horcp roll")
   else
-    print("[HORCP] You have "..HoRContribPointsDB.points.." contrib points.")
-    print("[HORCP] Help: /horcp help")
+    -------------------------------
+    -- Handle no arguments given --
+    -------------------------------
+    out("You have "..HoRContribPointsDB.points.." contribution points.")
   end
 end
