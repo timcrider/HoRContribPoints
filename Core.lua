@@ -9,7 +9,7 @@ local HoRContribPointsLimits = {
 }
 
 HoRContribPoints.defaults = {
-	points = 0
+  points = 0
 }
 
 -- Register the addon
@@ -34,28 +34,28 @@ end
 ---------------------------
 function HoRContribPoints:ADDON_LOADED(event, addOnName)
   -- Only run if we're the addon firing
-	if addOnName == "HoRContribPoints" then
+  if addOnName == "HoRContribPoints" then
     -- Pull in the stored data
-		HoRContribPointsDB = HoRContribPointsDB or {}
+    HoRContribPointsDB = HoRContribPointsDB or {}
 
     -- Assign stored instance to this instance
     self.db = HoRContribPointsDB
 
     -- Cycle through data and fill defaults where needed
     for k, v in pairs(self.defaults) do
-			if self.db[k] == nil then
-				self.db[k] = v
-			end
-		end
+      if self.db[k] == nil then
+        self.db[k] = v
+      end
+    end
 
     -- Get some client information
-		local version, build, _, tocversion = GetBuildInfo()
-		out(format("The current WoW build is %s (%d) and TOC is %d", version, build, tocversion))
+    local version, build, _, tocversion = GetBuildInfo()
+    out(format("The current WoW build is %s (%d) and TOC is %d", version, build, tocversion))
 
     -- 
-		self:RegisterEvent("PLAYER_ENTERING_WORLD")
-		self:UnregisterEvent(event)
-	end
+    self:RegisterEvent("PLAYER_ENTERING_WORLD")
+    self:UnregisterEvent(event)
+  end
 end
 
 ------------------------------------
