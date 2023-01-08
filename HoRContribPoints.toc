@@ -1,7 +1,7 @@
 ## Interface: 100002
 ## X-Max-Interface: 100002
 ## X-Min-Interface: 11403
-## Version: 1.0.1
+## Version: 1.0.5
 ## Title: HoR Contribution Points
 ## Notes: Making Contributing Easy
 ## Author: Rhodos <Timothy M. Crider>
