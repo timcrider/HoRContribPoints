@@ -1,10 +1,11 @@
 ## Interface: 100100
 ## X-Max-Interface: 100002
 ## X-Min-Interface: 11403
-## Version: 1.0.8
+## Version: 1.0.9
 ## Title: HoR Contribution Points
 ## Notes: Making Contributing Easy
 ## Author: Rhodos <Timothy M. Crider>
 ## SavedVariables: HoRContribPointsDB
+## IconTexture: Interface\Icons\inv_misc_dice_01
 
 Core.lua
